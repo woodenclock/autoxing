@@ -1,0 +1,17 @@
+{
+"id":28,
+"map_name":"BlueOceanNew",
+"uid":"6a2bab6e7d53d3163e1eb13e",
+"map_version":1,
+"create_time":1781246829,
+"last_modified_time":1781488355,
+"grid_origin_x":-37.5,
+"grid_origin_y":-19.0,
+"grid_resolution":0.05,
+"overlays_version":2,
+"overlays":"{\"type\": \"FeatureCollection\", \"features\": [{\"id\": \"6a2bac7b46b37327c593363b\", \"type\": \"Feature\", \"geometry\": {\"type\": \"Point\", \"coordinates\": [-0.13443853667262443, -0.4981316698765672]}, \"properties\": {\"dockingPointId\": \"6a2bac7b7bb11a09b2928a2b\", \"endType\": \"0\", \"iconYaw\": 364, \"mapOverlay\": true, \"startType\": \"0\", \"type\": \"36\", \"yaw\": \"86\"}}, {\"id\": \"6a2bac7b7bb11a09b2928a2b\", \"type\": \"Feature\", \"geometry\": {\"type\": \"Point\", \"coordinates\": [-0.07170511933291884, 0.39899799464162183]}, \"properties\": {\"deviceIds\": [\"L352511d06791Lx\"], \"dockingPointId\": \"6a2bac7b46b37327c593363b\", \"endType\": \"0\", \"iconYaw\": 184, \"mapOverlay\": true, \"name\": \"DemoChargingStation\", \"startType\": \"0\", \"subtype\": \"24v\", \"type\": \"9\", \"yaw\": 266}}, {\"id\": \"6a2bacc8fcf8b5fd34feb8ad\", \"type\": \"Feature\", \"geometry\": {\"type\": \"Point\", \"coordinates\": [-2.575, 0.6375000000000001]}, \"properties\": {\"endType\": \"0\", \"iconYaw\": 269, \"mapOverlay\": true, \"name\": \"StandbyRoad\", \"startType\": \"0\", \"type\": \"10\", \"yaw\": 181}}, {\"id\": \"6a2baea4e5b2d5767154ba6f\", \"type\": \"Feature\", \"geometry\": {\"type\": \"Point\", \"coordinates\": [-4.9975, -6.9925]}, \"properties\": {\"endType\": \"0\", \"iconYaw\": 433, \"mapOverlay\": true, \"name\": \"StandbyDemo\", \"startType\": \"0\", \"type\": \"10\", \"yaw\": 17}}, {\"id\": \"6a2bb5b62ef8636801589f55\", \"type\": \"Feature\", \"geometry\": {\"type\": \"Point\", \"coordinates\": [-0.005000000000000001, 4.3775]}, \"properties\": {\"endType\": \"0\", \"iconYaw\": 202, \"mapOverlay\": true, \"name\": \"Point1\", \"startType\": \"0\", \"type\": \"11\", \"yaw\": 248}}]}",
+"thumbnail_url":"http://192.168.68.64:8090/maps/28/thumbnail",
+"image_url":"http://192.168.68.64:8090/maps/28.png",
+"download_url":"http://192.168.68.64:8090/maps/28/download",
+"pbstream_url":"http://192.168.68.64:8090/maps/28.pbstream"
+}
