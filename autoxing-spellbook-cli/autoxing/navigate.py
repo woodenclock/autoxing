@@ -60,6 +60,7 @@ def navigate(
         "creator": creator or DEFAULT_CREATOR,
         "type": move_type,
     }
+
     if target_x is not None:
         payload["target_x"] = float(target_x)
     if target_y is not None:
@@ -80,6 +81,7 @@ def navigate(
         payload["charge_retry_count"] = int(charge_retry_count)
     if rack_area_id is not None:
         payload["rack_area_id"] = rack_area_id
+
     props: dict[str, Any] = {}
     if inplace_rotate is not None:
         props["inplace_rotate"] = bool(inplace_rotate)
@@ -87,6 +89,7 @@ def navigate(
         props["rack_layer"] = int(rack_layer)
     if props:
         payload["properties"] = props
+
     if extra:
         for k, v in extra.items():
             if k in payload and isinstance(payload[k], dict) and isinstance(v, dict):
@@ -124,11 +127,11 @@ def _print_planning_status(state: str) -> None:
     if state == "succeeded":
         hint = "done"
     elif state == "moving":
-        hint = "moving — Ctrl+C to cancel"
+        hint = "moving - Ctrl+C to cancel"
     elif state in ("failed", "cancelled"):
         hint = state
     else:
-        hint = f"{state} — Ctrl+C to cancel"
+        hint = f"{state} - Ctrl+C to cancel"
     sys.stderr.write(f"\rmoving.... ({hint})   ")
     sys.stderr.flush()
 
@@ -144,7 +147,7 @@ def _handle_planning_message(state: _MoveWatchState, data: object) -> None:
 
 
 async def _monitor_move_planning_async(state: _MoveWatchState) -> None:
-    """Stream ``/planning_state`` until terminal state or KeyboardInterrupt."""
+    """Stream /planning_state until terminal state or KeyboardInterrupt."""
     want = {_PLANNING_TOPIC}
     ot = timeout_seconds()
     uri = ws_uri_from_robot_ip(ROBOT.ROBOT_IP)
@@ -152,26 +155,30 @@ async def _monitor_move_planning_async(state: _MoveWatchState) -> None:
     async with websockets.connect(uri, open_timeout=ot) as ws:
         await ws.send(json.dumps({"enable_topic": _PLANNING_TOPIC}))
         print("moving....", file=sys.stderr, flush=True)
+
         while state.terminal_state is None:
             try:
                 raw = await asyncio.wait_for(ws.recv(), timeout=0.5)
             except asyncio.TimeoutError:
                 continue
+
             try:
                 data = json.loads(raw)
             except (json.JSONDecodeError, TypeError):
                 continue
+
             topic = data.get("topic")
             if isinstance(topic, str) and topic in want:
                 _handle_planning_message(state, data)
 
 
 def monitor_move_after_dispatch() -> None:
-    """Watch ``/planning_state``; cancel on Ctrl+C unless move already ``succeeded``."""
+    """Watch /planning_state; cancel on Ctrl+C unless move already succeeded."""
     from cancel_move import cancel_move_robust
 
     watch = _MoveWatchState()
     interrupted = False
+
     try:
         asyncio.run(_monitor_move_planning_async(watch))
     except KeyboardInterrupt:
@@ -179,13 +186,14 @@ def monitor_move_after_dispatch() -> None:
     finally:
         sys.stderr.write("\n")
         sys.stderr.flush()
+
         if watch.terminal_state == "succeeded":
             print("Move finished: succeeded", file=sys.stderr)
         elif watch.terminal_state:
             print(f"Move finished: {watch.terminal_state}", file=sys.stderr)
         elif interrupted and should_cancel_on_interrupt(watch.last_move_state):
             print(
-                "Interrupt — sending cancel (PATCH /chassis/moves/current)…",
+                "Interrupt - sending cancel (PATCH /chassis/moves/current)...",
                 file=sys.stderr,
                 flush=True,
             )
@@ -195,9 +203,11 @@ def monitor_move_after_dispatch() -> None:
 def _merge_extra_json(s: str | None) -> dict[str, Any] | None:
     if not s:
         return None
+
     obj = json.loads(s)
     if not isinstance(obj, dict):
         raise ValueError("--json-extra must be a JSON object")
+
     return obj
 
 
@@ -205,12 +215,15 @@ if __name__ == "__main__":
     from get_waypoints import get_waypoints
 
     parser = argparse.ArgumentParser(
-        description="POST /chassis/moves — navigation / charge / route / elevator / rack move types.",
+        description="POST /chassis/moves - navigation / charge / route / elevator / rack move types.",
     )
     parser.add_argument(
         "rest",
         nargs="*",
-        help="Either three numbers X Y ORI (radians), or one waypoint name (standard only)",
+        help=(
+            "Either X Y, X Y ORI in radians, or one waypoint name "
+            "(waypoint name is standard only)"
+        ),
     )
     parser.add_argument(
         "--type",
@@ -223,7 +236,12 @@ if __name__ == "__main__":
     parser.add_argument("--target-ori", type=float)
     parser.add_argument("--target-z", type=float)
     parser.add_argument("--target-accuracy", type=float)
-    parser.add_argument("--route", "--route-coordinates", dest="route_coordinates", help="CSV x1,y1,x2,y2,...")
+    parser.add_argument(
+        "--route",
+        "--route-coordinates",
+        dest="route_coordinates",
+        help="CSV x1,y1,x2,y2,...",
+    )
     parser.add_argument("--detour-tolerance", type=float)
     parser.add_argument("--use-target-zone", action="store_true")
     parser.add_argument("--no-target-zone", action="store_true", dest="no_target_zone")
@@ -233,7 +251,7 @@ if __name__ == "__main__":
     parser.add_argument("--no-inplace-rotate", action="store_true", dest="no_inplace_rotate")
     parser.add_argument("--rack-layer", type=int)
     parser.add_argument("--creator", default=None)
-    parser.add_argument("--json-extra", help='merge JSON object, e.g.\'{{"rack_area_id":"a"}}\'')
+    parser.add_argument("--json-extra", help='merge JSON object, e.g. \'{"rack_area_id":"a"}\'')
     parser.add_argument("--body-file", help="full MoveRequest JSON (overrides other flags)")
     parser.add_argument(
         "--no-monitor",
@@ -260,15 +278,19 @@ if __name__ == "__main__":
 
     if args.body_file:
         payload = parse_json_file(args.body_file)
+
         if not isinstance(payload, dict):
             print("body-file must contain a JSON object", file=sys.stderr)
             sys.exit(1)
+
         data = request_api("POST", "/chassis/moves", json_body=payload)
         out = data if isinstance(data, dict) else None
+
         if out is not None:
             print_json(out)
             if not args.no_monitor:
                 monitor_move_after_dispatch()
+
         sys.exit(0 if out is not None else 1)
 
     ax = args.target_x
@@ -276,44 +298,70 @@ if __name__ == "__main__":
     ao = args.target_ori
 
     if args.rest:
-        if len(args.rest) == 3:
+        if len(args.rest) == 2:
             try:
-                ax, ay, ao = float(args.rest[0]), float(args.rest[1]), float(args.rest[2])
+                ax = float(args.rest[0])
+                ay = float(args.rest[1])
+                ao = None
+            except ValueError:
+                print("Two rest args must be numeric X Y.", file=sys.stderr)
+                sys.exit(1)
+
+        elif len(args.rest) == 3:
+            try:
+                ax = float(args.rest[0])
+                ay = float(args.rest[1])
+                ao = float(args.rest[2])
             except ValueError:
                 print("Three rest args must be numeric X Y ORI.", file=sys.stderr)
                 sys.exit(1)
+
         elif len(args.rest) == 1 and args.type == "standard":
             target_name = args.rest[0]
             wps = get_waypoints() or []
             hit = False
+
             for w in wps:
                 if w.get("name") == target_name:
-                    ax, ay, ao = w["x"], w["y"], w["ori"]
+                    ax = w["x"]
+                    ay = w["y"]
+                    ao = w.get("ori")
                     hit = True
                     break
+
             if not hit:
                 print(f"Waypoint {target_name!r} not found in overlays.", file=sys.stderr)
                 sys.exit(1)
+
         else:
-            print("Provide three numbers X Y ORI, one waypoint name, or use --target-x/--target-y.", file=sys.stderr)
+            print(
+                "Provide X Y, X Y ORI, one waypoint name, or use --target-x/--target-y.",
+                file=sys.stderr,
+            )
             sys.exit(1)
+
     elif args.type == "standard" and ax is None and ay is None:
         from cli_tables import print_waypoints_table
 
         wps = get_waypoints() or []
         if not wps:
             print(
-                "No overlay points — provide: navigate X Y ORI\n"
+                "No overlay points - provide: navigate X Y or navigate X Y ORI\n"
                 "(or upload map with landmarks/chargers in overlays.)",
                 file=sys.stderr,
             )
             sys.exit(1)
+
         print_waypoints_table(wps)
         sel = input("Index: ").strip()
+
         if not sel.isdigit() or int(sel) >= len(wps):
             sys.exit(1)
+
         p = wps[int(sel)]
-        ax, ay, ao = p["x"], p["y"], p["ori"]
+        ax = p["x"]
+        ay = p["y"]
+        ao = p.get("ori")
 
     out = navigate(
         ax,
@@ -332,6 +380,7 @@ if __name__ == "__main__":
         rack_layer=args.rack_layer,
         extra=extra,
     )
+
     if out is not None:
         print_json(out)
         if not args.no_monitor:

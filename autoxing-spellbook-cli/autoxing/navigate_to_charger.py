@@ -11,19 +11,18 @@ def navigate_to_charger(*, creator: str | None = None) -> dict | None:
         "POST",
         "/chassis/moves",
         json_body={
-        "creator": creator or DEFAULT_CREATOR,
-        "type": "charge",
-        "charge_retry_count": 3,
-    },
+            "creator": creator or DEFAULT_CREATOR,
+            "type": "charge",
+            "charge_retry_count": 3,
+        },
     )
     return data if isinstance(data, dict) else None
 
 
 if __name__ == "__main__":
-    ans = input("Dispatch charge dock move? [y/N]: ").strip().lower()
-    if ans not in ("y", "yes"):
-        print("Aborted.")
-    else:
-        out = navigate_to_charger()
-        if out is not None:
-            print_json(out)
+    from navigate import monitor_move_after_dispatch
+
+    out = navigate_to_charger()
+    if out is not None:
+        print_json(out)
+        monitor_move_after_dispatch()
