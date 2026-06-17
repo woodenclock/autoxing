@@ -4,6 +4,3 @@ __pycache__/
 .venv/
 *.zip
 *.json
-
-
-autoxing-spellbook-cli/autoxing_spellbook.egg-info
