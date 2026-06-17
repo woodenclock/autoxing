@@ -10,7 +10,11 @@ def navigate_to_charger(*, creator: str | None = None) -> dict | None:
     data = request_api(
         "POST",
         "/chassis/moves",
-        json_body={"creator": creator or DEFAULT_CREATOR, "type": "charge"},
+        json_body={
+        "creator": creator or DEFAULT_CREATOR,
+        "type": "charge",
+        "charge_retry_count": 3,
+    },
     )
     return data if isinstance(data, dict) else None
 

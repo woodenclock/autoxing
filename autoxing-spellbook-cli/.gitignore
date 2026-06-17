@@ -2,3 +2,8 @@ bin/
 __pycache__/
 *.py[cod]
 .venv/
+*.zip
+*.json
+
+
+autoxing-spellbook-cli/autoxing_spellbook.egg-info

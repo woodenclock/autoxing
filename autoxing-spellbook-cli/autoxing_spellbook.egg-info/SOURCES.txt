@@ -49,6 +49,7 @@ autoxing/navigate_along_route.py
 autoxing/navigate_to_charger.py
 autoxing/patch_map.py
 autoxing/patch_settings.py
+autoxing/pick_rack.py
 autoxing/restart_service.py
 autoxing/set_control_mode.py
 autoxing/set_emergency_stop.py
